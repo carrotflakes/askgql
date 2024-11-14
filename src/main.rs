@@ -1,4 +1,4 @@
-use askgql::process_inquiry;
+use askgql::{process_inquiry, process_interactive};
 use clap::Parser;
 
 /// A simple CLI to interact with a GraphQL server.
@@ -11,7 +11,7 @@ struct Args {
 
     /// The inquiry to send to the GraphQL server.
     #[arg(short, long)]
-    inquiry: String,
+    inquiry: Option<String>,
 
     /// OpenAI API key.
     #[arg(short, long)]
@@ -39,12 +39,20 @@ async fn main() {
     let gptcl = gptcl::GptClient::new(gptcl_hyper::HyperClient::new(), args.api_key.to_owned());
     let gql = askgql::gql::GqlClient::new(args.url, &args.authorization);
 
-    process_inquiry(
-        gql,
-        &gptcl,
-        &args.inquiry,
-        &args.language,
-        args.omit_schema_comments,
-    )
-    .await;
+    // let schema = gql.introspect(args.omit_schema_comments).await.unwrap();
+    // println!("schema: {}", schema);
+    // return;
+
+    if let Some(inquiry) = &args.inquiry {
+        process_inquiry(
+            gql,
+            &gptcl,
+            args.omit_schema_comments,
+            inquiry,
+            &args.language,
+        )
+        .await;
+    } else {
+        process_interactive(gql, &gptcl, args.omit_schema_comments).await;
+    }
 }
