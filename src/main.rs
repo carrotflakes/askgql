@@ -32,6 +32,10 @@ struct Args {
     /// Schema file.
     #[arg(short, long)]
     schema: Option<String>,
+
+    /// Print schema and exit.
+    #[arg(long)]
+    print_schema: bool,
 }
 
 #[tokio::main]
@@ -48,8 +52,10 @@ async fn main() {
     } else {
         gql.introspect(args.omit_schema_comments).await.unwrap()
     };
-    // println!("schema: {}", schema);
-    // return;
+    if args.print_schema {
+        println!("schema:\n{}", schema);
+        return;
+    }
 
     if let Some(inquiry) = &args.inquiry {
         process_inquiry(gql, &gptcl, schema, inquiry, &args.language).await;
