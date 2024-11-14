@@ -9,7 +9,7 @@ struct Args {
     #[arg(short, long)]
     url: String,
 
-    /// The inquiry to send to the GraphQL server.
+    /// The inquiry to start the conversation.
     #[arg(short, long)]
     inquiry: Option<String>,
 
@@ -20,10 +20,6 @@ struct Args {
     /// The authorization token to send to the GraphQL server.
     #[arg(long)]
     authorization: Option<String>,
-
-    /// The language to use for the response.
-    #[arg(short, long)]
-    language: Option<String>,
 
     /// Omit the comments from the GraphQL schema.
     #[arg(long)]
