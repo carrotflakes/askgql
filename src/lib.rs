@@ -1,55 +1,20 @@
-pub mod gpt;
 pub mod gql;
 pub mod json_to_schema;
 
 use std::io::BufRead;
 
-use gpt::{generate_query, generate_response};
-
 pub type GptClient = gptcl::GptClient<gptcl_hyper::HyperClient>;
 
-pub async fn process_inquiry(
+pub async fn process_interactive(
     gql: gql::GqlClient,
     gpt: &GptClient,
     schema: String,
-    inquiry: &str,
-    language: &Option<String>,
+    first_message: Option<String>,
 ) {
-    println!("inquiry: {}", inquiry);
-
-    let query = generate_query(gpt, &schema, inquiry).await.unwrap();
-    println!("gql query: {:?}", query);
-
-    let body = serde_json::json!({
-        // "operationName": "",
-        "variables": {},
-        "query": query
-    })
-    .to_string();
-
-    let res = gql.request(body).await.unwrap();
-    println!("gql response: {}", res);
-
-    let response = generate_response(gpt, &query, &res, language)
-        .await
-        .unwrap();
-    println!("response: {}", response);
-}
-
-pub async fn process_interactive(gql: gql::GqlClient, gpt: &GptClient, schema: String) {
     let function_name = "graphQLRequest";
 
     let mut req = gpt_model::ChatRequest::from_model(gptcl::MODEL_GPT_4O_MINI.to_owned());
     req.temperature = Some(0.0);
-    req.messages = vec![gpt_model::ChatMessage::from_system(format!(
-        r#"You have a GraphQL server and an assistant for it.
-
-GraphQL schema:
-```
-{}
-```"#,
-        schema
-    ))];
     req.functions = std::sync::Arc::new(vec![gpt_model::Function {
         name: function_name.to_owned(),
         description: Some(format!("Send GraphQL request and receive the response")),
@@ -65,6 +30,21 @@ GraphQL schema:
             "additionalProperties": false
         }),
     }]);
+
+    req.messages
+        .push(gpt_model::ChatMessage::from_system(format!(
+            r#"You are an assistant that can interact with a GraphQL server.
+
+GraphQL schema:
+```
+{}
+```"#,
+            schema
+        )));
+    if let Some(message) = first_message {
+        req.messages
+            .push(gpt_model::ChatMessage::from_user(message));
+    }
 
     loop {
         let res = gpt.call(&req).await.unwrap();

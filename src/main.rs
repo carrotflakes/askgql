@@ -1,4 +1,4 @@
-use askgql::{process_inquiry, process_interactive};
+use askgql::process_interactive;
 use clap::Parser;
 
 /// A simple CLI to interact with a GraphQL server.
@@ -57,9 +57,5 @@ async fn main() {
         return;
     }
 
-    if let Some(inquiry) = &args.inquiry {
-        process_inquiry(gql, &gptcl, schema, inquiry, &args.language).await;
-    } else {
-        process_interactive(gql, &gptcl, schema).await;
-    }
+    process_interactive(gql, &gptcl, schema, args.inquiry.clone()).await;
 }
