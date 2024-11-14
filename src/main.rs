@@ -28,6 +28,10 @@ struct Args {
     /// Omit the comments from the GraphQL schema.
     #[arg(long)]
     omit_schema_comments: bool,
+
+    /// Schema file.
+    #[arg(short, long)]
+    schema: Option<String>,
 }
 
 #[tokio::main]
@@ -39,7 +43,11 @@ async fn main() {
     let gptcl = gptcl::GptClient::new(gptcl_hyper::HyperClient::new(), args.api_key.to_owned());
     let gql = askgql::gql::GqlClient::new(args.url, &args.authorization);
 
-    let schema = gql.introspect(args.omit_schema_comments).await.unwrap();
+    let schema = if let Some(schema) = &args.schema {
+        std::fs::read_to_string(schema).unwrap()
+    } else {
+        gql.introspect(args.omit_schema_comments).await.unwrap()
+    };
     // println!("schema: {}", schema);
     // return;
 
