@@ -25,7 +25,7 @@ pub async fn generate_query<T: gptcl::http_client::HttpClient>(
     req.temperature = Some(0.0);
     req.messages = vec![
         ChatMessage::from_system(
-            r#"Your response will be in JSON format like `{"query": ...}`"#.to_owned(),
+            r#"Your response will be in JSON format like `{"query": "query {user {name email}}"}`"#.to_owned(),
         ),
         ChatMessage::from_user(format!(
             r#"There is a GraphQL server and the schema is here:
