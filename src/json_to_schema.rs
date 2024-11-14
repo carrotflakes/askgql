@@ -1,6 +1,12 @@
+use std::cell::RefCell;
+
 use serde::{Deserialize, Serialize};
 
-pub fn json_to_schema(json: &str) -> String {
+const WITH_COMMENTS: RefCell<bool> = RefCell::new(false);
+
+pub fn json_to_schema(json: &str, with_comments: bool) -> String {
+    *WITH_COMMENTS.borrow_mut() = with_comments;
+
     let schema: Container = serde_json::from_str(json).unwrap();
     let mut schema_str = String::new();
 
@@ -213,6 +219,10 @@ fn write_input_field(writer: &mut String, input_field: &InputField) {
 }
 
 fn write_comment(writer: &mut String, comment: &str) {
+    if !*WITH_COMMENTS.borrow() {
+        return;
+    }
+
     writer.push_str(r#"""""#);
     writer.push_str(comment);
     writer.push_str(r#"""""#);

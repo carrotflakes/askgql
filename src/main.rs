@@ -27,6 +27,10 @@ struct Args {
     /// The language to use for the response.
     #[arg(short, long)]
     language: Option<String>,
+
+    /// Omit the comments from the GraphQL schema.
+    #[arg(long, default_value = "false")]
+    omit_schema_comments: bool,
 }
 
 #[tokio::main]
@@ -68,7 +72,7 @@ async fn main() {
     let schema = String::from_utf8_lossy(&res);
     println!("schema (json) size: {}", schema.len());
 
-    let schema = json_to_schema(&schema);
+    let schema = json_to_schema(&schema, !args.omit_schema_comments);
     println!("schema size: {}", schema.len());
     // println!("schema: {}", schema);
     // return;
