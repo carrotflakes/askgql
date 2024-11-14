@@ -11,12 +11,10 @@ pub type GptClient = gptcl::GptClient<gptcl_hyper::HyperClient>;
 pub async fn process_inquiry(
     gql: gql::GqlClient,
     gpt: &GptClient,
-    omit_schema_comments: bool,
+    schema: String,
     inquiry: &str,
     language: &Option<String>,
 ) {
-    let schema = gql.introspect(omit_schema_comments).await.unwrap();
-
     println!("inquiry: {}", inquiry);
 
     let query = generate_query(gpt, &schema, inquiry).await.unwrap();
@@ -38,9 +36,7 @@ pub async fn process_inquiry(
     println!("response: {}", response);
 }
 
-pub async fn process_interactive(gql: gql::GqlClient, gpt: &GptClient, omit_schema_comments: bool) {
-    let schema = gql.introspect(omit_schema_comments).await.unwrap();
-
+pub async fn process_interactive(gql: gql::GqlClient, gpt: &GptClient, schema: String) {
     let function_name = "graphQLRequest";
 
     let mut req = gpt_model::ChatRequest::from_model(gptcl::MODEL_GPT_4O_MINI.to_owned());

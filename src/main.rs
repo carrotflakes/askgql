@@ -39,20 +39,13 @@ async fn main() {
     let gptcl = gptcl::GptClient::new(gptcl_hyper::HyperClient::new(), args.api_key.to_owned());
     let gql = askgql::gql::GqlClient::new(args.url, &args.authorization);
 
-    // let schema = gql.introspect(args.omit_schema_comments).await.unwrap();
+    let schema = gql.introspect(args.omit_schema_comments).await.unwrap();
     // println!("schema: {}", schema);
     // return;
 
     if let Some(inquiry) = &args.inquiry {
-        process_inquiry(
-            gql,
-            &gptcl,
-            args.omit_schema_comments,
-            inquiry,
-            &args.language,
-        )
-        .await;
+        process_inquiry(gql, &gptcl, schema, inquiry, &args.language).await;
     } else {
-        process_interactive(gql, &gptcl, args.omit_schema_comments).await;
+        process_interactive(gql, &gptcl, schema).await;
     }
 }
