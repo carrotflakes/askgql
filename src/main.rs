@@ -29,7 +29,7 @@ struct Args {
     language: Option<String>,
 
     /// Omit the comments from the GraphQL schema.
-    #[arg(long, default_value = "false")]
+    #[arg(long)]
     omit_schema_comments: bool,
 }
 
