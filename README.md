@@ -6,6 +6,8 @@ AskGQL is a natural language interface for GraphQL servers.
 
 You need to have an OpenAI API key to use this tool. You can get one [here](https://platform.openai.com/signup).
 
+Make sure that the GraphQL server supports introspection.
+
 ### Installation
 
 ```bash
