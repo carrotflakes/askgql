@@ -20,9 +20,9 @@ struct Args {
     #[arg(short, long)]
     api_key: String,
 
-    /// The authentication token to send to the GraphQL server.
+    /// The authorization token to send to the GraphQL server.
     #[arg(long)]
-    authentication: Option<String>,
+    authorization: Option<String>,
 
     /// The language to use for the response.
     #[arg(short, long)]
@@ -43,7 +43,11 @@ async fn main() {
         reqwest::header::CONTENT_TYPE,
         reqwest::header::HeaderValue::from_static("application/json"),
     );
-    if let Some(auth) = &args.authentication {
+    headers.insert(
+        reqwest::header::USER_AGENT,
+        reqwest::header::HeaderValue::from_static("askgql"),
+    );
+    if let Some(auth) = &args.authorization {
         headers.insert(
             reqwest::header::AUTHORIZATION,
             reqwest::header::HeaderValue::from_str(auth).unwrap(),
