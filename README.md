@@ -1,6 +1,6 @@
 # AskGQL
 
-AskGQL is a natural language interface for GraphQL servers.
+AskGQL is a conversational LLM assistant that can interact with GraphQL servers. Users can ask questions in a conversational manner, and AskGQL can generate GraphQL queries and send them to the server.
 
 ![demo](demo.png)
 
@@ -19,7 +19,7 @@ cargo install --path .
 ### Run
 
 ```bash
-askgql -u "https://countries.trevorblades.com/" -i "What is the official language of India?" -a $OPENAI_API_KEY
+askgql -u "https://countries.trevorblades.com/" -a $OPENAI_API_KEY
 ```
 
 ## License
