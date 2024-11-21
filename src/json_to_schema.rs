@@ -2,12 +2,25 @@ use std::cell::RefCell;
 
 use serde::{Deserialize, Serialize};
 
+const BUILTIN_TYPES: [&str; 8] = [
+    "__Schema",
+    "__Type",
+    "__TypeKind",
+    "__Field",
+    "__InputValue",
+    "__EnumValue",
+    "__Directive",
+    "__DirectiveLocation",
+];
+
 thread_local! {
     static WITH_COMMENTS: RefCell<bool> = RefCell::new(false);
+    static WITH_BUILTIN_TYPES: RefCell<bool> = RefCell::new(false);
 }
 
-pub fn json_to_schema(json: &str, with_comments: bool) -> String {
+pub fn json_to_schema(json: &str, with_comments: bool, with_builtin_types: bool) -> String {
     WITH_COMMENTS.with(|f| *f.borrow_mut() = with_comments);
+    WITH_BUILTIN_TYPES.with(|f| *f.borrow_mut() = with_builtin_types);
 
     let schema: Container = serde_json::from_str(json).unwrap();
     let mut schema_str = String::new();
@@ -70,6 +83,11 @@ fn write_types(writer: &mut String, types: &Vec<Type>) {
 }
 
 fn write_type(writer: &mut String, type_: &Type) {
+    let with_builtin_types = WITH_BUILTIN_TYPES.with(|f| *f.borrow());
+    if !with_builtin_types && BUILTIN_TYPES.contains(&type_.name.as_str()) {
+        return;
+    }
+
     if let Some(description) = &type_.description {
         write_comment(writer, description);
     }

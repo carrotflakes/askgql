@@ -25,6 +25,10 @@ struct Args {
     #[arg(long)]
     omit_schema_comments: bool,
 
+    /// Include the built-in types in the GraphQL schema.
+    #[arg(long)]
+    include_builtin_types: bool,
+
     /// Schema file.
     #[arg(short, long)]
     schema: Option<String>,
@@ -46,7 +50,9 @@ async fn main() {
     let schema = if let Some(schema) = &args.schema {
         std::fs::read_to_string(schema).unwrap()
     } else {
-        gql.introspect(args.omit_schema_comments).await.unwrap()
+        gql.introspect(!args.omit_schema_comments, args.include_builtin_types)
+            .await
+            .unwrap()
     };
     if args.print_schema {
         println!("schema:\n{}", schema);

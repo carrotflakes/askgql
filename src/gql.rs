@@ -31,12 +31,16 @@ impl GqlClient {
         }
     }
 
-    pub async fn introspect(&self, omit_schema_comments: bool) -> Result<String, String> {
+    pub async fn introspect(
+        &self,
+        with_schema_comments: bool,
+        with_builtin_types: bool,
+    ) -> Result<String, String> {
         let body = INTROSPECTION_QUERY.to_owned();
         let schema = self.request(body).await?;
         println!("schema (json) size: {}", schema.len());
 
-        let schema = json_to_schema(&schema, !omit_schema_comments);
+        let schema = json_to_schema(&schema, with_schema_comments, with_builtin_types);
         println!("schema size: {}", schema.len());
         Ok(schema)
     }
