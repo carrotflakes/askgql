@@ -1,7 +1,7 @@
 pub mod gql;
 pub mod json_to_schema;
 
-use std::io::BufRead;
+use std::io::{BufRead, Write};
 
 pub type GptClient = gptcl::GptClient<gptcl_hyper::HyperClient>;
 
@@ -57,7 +57,8 @@ GraphQL schema:
                     return;
                 };
                 println!("ai > {}", mes);
-                println!("user >");
+                print!("user > ");
+                std::io::stdout().flush().unwrap();
                 let mut input = String::new();
                 std::io::stdin().lock().read_line(&mut input).unwrap();
                 req.messages
