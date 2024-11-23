@@ -1,8 +1,11 @@
 [package]
 name = "askgql"
+description = "A CLI tool to interact with GraphQL APIs"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
+repository = "https://github.com/carrotflakes/askgql"
+keywords = ["cli", "graphql", "gpt"]
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
