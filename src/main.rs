@@ -13,6 +13,11 @@ struct Args {
     #[arg(short, long)]
     inquiry: Option<String>,
 
+    /// The model to use for the conversation.
+    /// The default is `gpt-4o-mini`.
+    #[arg(short, long, default_value = "gpt-4o-mini")]
+    model: String,
+
     /// OpenAI API key.
     #[arg(short, long)]
     api_key: String,
@@ -44,7 +49,11 @@ async fn main() {
 
     println!("api server url: {}", args.url);
 
-    let gptcl = gptcl::GptClient::new(gptcl_hyper::HyperClient::new(), args.api_key.to_owned());
+    let mut gptcl = gptcl::GptClient::new(gptcl_hyper::HyperClient::new(), args.api_key.to_owned());
+    if args.model.starts_with("deepseek-") {
+        gptcl.endpoint = "https://api.deepseek.com/chat/completions".to_owned();
+    }
+
     let gql = askgql::gql::GqlClient::new(args.url, &args.authorization);
 
     let schema = if let Some(schema) = &args.schema {
@@ -59,5 +68,12 @@ async fn main() {
         return;
     }
 
-    process_interactive(gql, &gptcl, schema, args.inquiry.clone()).await;
+    process_interactive(
+        gql,
+        &gptcl,
+        args.model.clone(),
+        schema,
+        args.inquiry.clone(),
+    )
+    .await;
 }

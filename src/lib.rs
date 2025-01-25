@@ -10,12 +10,13 @@ pub type GptClient = gptcl::GptClient<gptcl_hyper::HyperClient>;
 pub async fn process_interactive(
     gql: gql::GqlClient,
     gpt: &GptClient,
+    model: String,
     schema: String,
     first_message: Option<String>,
 ) {
     let function_name = "graphQLRequest";
 
-    let mut req = gpt_model::ChatRequest::from_model(gptcl::MODEL_GPT_4O_MINI.to_owned());
+    let mut req = gpt_model::ChatRequest::from_model(model);
     req.temperature = Some(0.0);
     req.tools = std::sync::Arc::new(vec![gpt_model::Tool::Function {
         function: gpt_model::Function {
