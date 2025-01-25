@@ -9,9 +9,8 @@ keywords = ["cli", "graphql", "gpt"]
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-gptcl = { git = "https://github.com/carrotflakes/gptcl", rev = "46f4cf081188d8caf00ab03bf0c928918e359d0c" }
-gpt-model = { git = "https://github.com/carrotflakes/gptcl", rev = "46f4cf081188d8caf00ab03bf0c928918e359d0c" }
-gptcl-hyper = { git = "https://github.com/carrotflakes/gptcl", rev = "46f4cf081188d8caf00ab03bf0c928918e359d0c" }
+gptcl = { git = "https://github.com/carrotflakes/gptcl", rev = "9d8f4b4a25456f1e1145420c15a87b779ce86191" }
+gptcl-hyper = { git = "https://github.com/carrotflakes/gptcl", rev = "9d8f4b4a25456f1e1145420c15a87b779ce86191" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.12", features = ["json"] }

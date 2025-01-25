@@ -3,6 +3,8 @@ pub mod json_to_schema;
 
 use std::io::{BufRead, Write};
 
+use gptcl::model as gpt_model;
+
 pub type GptClient = gptcl::GptClient<gptcl_hyper::HyperClient>;
 
 pub async fn process_interactive(
@@ -15,20 +17,23 @@ pub async fn process_interactive(
 
     let mut req = gpt_model::ChatRequest::from_model(gptcl::MODEL_GPT_4O_MINI.to_owned());
     req.temperature = Some(0.0);
-    req.functions = std::sync::Arc::new(vec![gpt_model::Function {
-        name: function_name.to_owned(),
-        description: Some(format!("Send GraphQL request and receive the response")),
-        parameters: serde_json::json!({
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": r#"GraphQL query like `{"query": "query {user {name email}}"}`"#,
-                }
-            },
-            "required": ["query"],
-            "additionalProperties": false
-        }),
+    req.tools = std::sync::Arc::new(vec![gpt_model::Tool::Function {
+        function: gpt_model::Function {
+            name: function_name.to_owned(),
+            description: Some(format!("Send GraphQL request and receive the response")),
+            parameters: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": r#"GraphQL query like `{"query": "query {user {name email}}"}`"#,
+                    }
+                },
+                "required": ["query"],
+                "additionalProperties": false
+            }),
+            strict: true,
+        },
     }]);
 
     req.messages
@@ -64,23 +69,21 @@ GraphQL schema:
                 req.messages
                     .push(gpt_model::ChatMessage::from_user(input.trim().to_owned()));
             }
-            "function_call" => {
-                let Some(fc) = &res.choices[0].message.function_call else {
-                    println!("no function call");
-                    return;
-                };
-                if fc.name == function_name {
-                    let body = fc.arguments.clone();
-                    println!("gql query: {}", &body);
-                    let res = gql.request(body).await.unwrap();
-                    println!("gql response: {}", res);
-                    req.messages
-                        .push(gpt_model::ChatMessage::from_function_response(
-                            function_name.to_owned(),
-                            res,
-                        ));
-                } else {
-                    println!("unknown function: {}", fc.name);
+            "tool_calls" => {
+                for tool_call in &res.choices[0].message.tool_calls {
+                    if tool_call.r#type == "function" && tool_call.function.name == function_name {
+                        let body = tool_call.function.arguments.clone();
+                        println!("gql query: {}", &body);
+                        let res = gql.request(body).await.unwrap();
+                        println!("gql response: {}", res);
+                        req.messages
+                            .push(gpt_model::ChatMessage::from_tool_response(
+                                tool_call.id.clone(),
+                                res,
+                            ));
+                    } else {
+                        println!("unknown tool call: {:?}", tool_call);
+                    }
                 }
             }
             finish_reason => {
